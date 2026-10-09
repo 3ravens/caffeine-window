@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Caffeine Window</string>
+    <string name="monitor_channel_name">Wake monitoring</string>
+    <string name="monitor_channel_description">Keeps wake detection active while the phone is locked.</string>
+    <string name="monitor_notification_title">Caffeine Window is monitoring unlocks</string>
+    <string name="monitor_notification_body">Local wake detection for your caffeine delay timer.</string>
+    <string name="caffeine_channel_name">Caffeine window alerts</string>
+    <string name="caffeine_channel_description">Notifies you when your caffeine delay window opens.</string>
+    <string name="settings_monitor_notification_title">Wake monitoring notification</string>
+    <string name="settings_monitor_notification_body">Android requires a small ongoing notification while the app watches for your wake-up. You can hide it without turning off caffeine alerts — open Wake monitoring below and turn off that channel or set it to Silent.</string>
+    <string name="settings_monitor_notification_hidden">Hidden (wake detection still active)</string>
+    <string name="settings_monitor_notification_visible">Visible</string>
+    <string name="settings_monitor_notification_manage">Manage channel</string>
+    <string name="home_reliability_title">Setup needed for reliable wake detection</string>
+    <string name="home_reliability_body">Without notifications, exact alarms, and a battery-optimization exemption, overnight unlock detection can miss your wake-up.</string>
+    <string name="home_reliability_grant_notifications">Grant notifications</string>
+    <string name="home_reliability_open_exact_alarms">Allow exact alarms</string>
+    <string name="home_reliability_open_battery">Disable battery optimization</string>
+    <string name="home_reliability_open_settings">Open Settings</string>
+</resources>
