@@ -31,4 +31,5 @@ object SettingsKeys {
   const val NOTIFICATION_TITLE = "notification_title"
   const val NOTIFICATION_BODY = "notification_body"
   const val RESET_HOUR = "reset_hour"
+  const val LAST_NOTIFIED_LOGICAL_DAY = "last_notified_logical_day"
 }

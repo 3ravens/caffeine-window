@@ -3,6 +3,7 @@ package com.caffeinewindow.app.permission
 import android.Manifest
 import android.app.AlarmManager
 import android.app.NotificationManager
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -60,14 +61,17 @@ object PermissionHelper {
     }
   }
 
-  fun createBatteryOptimizationRequestIntent(context: Context): Intent {
-    return Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-      data = Uri.parse("package:${context.packageName}")
+  /**
+   * Opens system battery settings for the user to exempt the app themselves. The direct
+   * ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS prompt needs a permission that Play only
+   * allows for a short list of app categories, so we don't use it.
+   */
+  fun openBatteryOptimizationSettings(context: Context) {
+    try {
+      context.startActivity(createApplicationDetailsIntent(context))
+    } catch (_: ActivityNotFoundException) {
+      context.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
     }
-  }
-
-  fun createBatteryOptimizationSettingsIntent(): Intent {
-    return Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
   }
 
   fun createAppNotificationSettingsIntent(context: Context): Intent {

@@ -52,6 +52,17 @@ class SettingsRepository(
     settingsDao.upsert(SettingsEntity(SettingsKeys.RESET_HOUR, hour.toString()))
   }
 
+  /** Logical-day start (epoch millis) of the last caffeine-window notification shown. */
+  suspend fun getLastNotifiedLogicalDay(): Long? {
+    return settingsDao.getValue(SettingsKeys.LAST_NOTIFIED_LOGICAL_DAY)?.toLongOrNull()
+  }
+
+  suspend fun setLastNotifiedLogicalDay(logicalDayStartEpochMillis: Long) {
+    settingsDao.upsert(
+      SettingsEntity(SettingsKeys.LAST_NOTIFIED_LOGICAL_DAY, logicalDayStartEpochMillis.toString()),
+    )
+  }
+
   suspend fun ensureDefaults() {
     val current = getSettings()
     if (settingsDao.getValue(SettingsKeys.DELAY_MINUTES) == null) {

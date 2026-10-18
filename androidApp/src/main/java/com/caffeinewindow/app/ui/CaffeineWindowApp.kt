@@ -1,85 +1,58 @@
 package com.caffeinewindow.app.ui
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.caffeinewindow.app.ui.home.HomeScreen
 import com.caffeinewindow.app.ui.settings.SettingsScreen
 
-private sealed class TopLevelDestination(
-  val route: String,
-  val label: String,
-) {
-  data object Home : TopLevelDestination("home", "Home")
-  data object Settings : TopLevelDestination("settings", "Settings")
+private object Routes {
+    const val HOME = "home"
+    const val SETTINGS = "settings"
 }
 
+/**
+ * Home is the root; Settings is pushed on the stack from the gear in Home's top bar.
+ * A bottom bar comes back only when there are three or more real peer destinations.
+ */
 @Composable
 fun CaffeineWindowApp() {
-  val navController = rememberNavController()
-  val destinations = listOf(TopLevelDestination.Home, TopLevelDestination.Settings)
-  val navBackStackEntry by navController.currentBackStackEntryAsState()
-  val currentDestination = navBackStackEntry?.destination
-
-  Scaffold(
-    bottomBar = {
-      NavigationBar {
-        destinations.forEach { destination ->
-          val selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true
-          NavigationBarItem(
-            selected = selected,
-            onClick = {
-              navController.navigate(destination.route) {
-                popUpTo(navController.graph.startDestinationId) { saveState = true }
-                launchSingleTop = true
-                restoreState = true
-              }
-            },
-            icon = {
-              when (destination) {
-                TopLevelDestination.Home -> Icon(Icons.Default.Home, contentDescription = destination.label)
-                TopLevelDestination.Settings -> Icon(Icons.Default.Settings, contentDescription = destination.label)
-              }
-            },
-            label = { Text(destination.label) },
-          )
-        }
-      }
-    },
-  ) { innerPadding ->
+    val navController = rememberNavController()
     NavHost(
-      navController = navController,
-      startDestination = TopLevelDestination.Home.route,
-      modifier = Modifier.padding(innerPadding),
+        navController = navController,
+        startDestination = Routes.HOME,
+        enterTransition = {
+            fadeIn(tween(durationMillis = 250)) +
+                slideInHorizontally(tween(durationMillis = 250)) { it / 4 }
+        },
+        exitTransition = {
+            fadeOut(tween(durationMillis = 200)) +
+                slideOutHorizontally(tween(durationMillis = 200)) { -it / 8 }
+        },
+        popEnterTransition = {
+            fadeIn(tween(durationMillis = 250)) +
+                slideInHorizontally(tween(durationMillis = 250)) { -it / 4 }
+        },
+        popExitTransition = {
+            fadeOut(tween(durationMillis = 200)) +
+                slideOutHorizontally(tween(durationMillis = 200)) { it / 8 }
+        },
     ) {
-      composable(TopLevelDestination.Home.route) {
-        HomeScreen(
-          onOpenSettings = {
-            navController.navigate(TopLevelDestination.Settings.route) {
-              popUpTo(navController.graph.startDestinationId) { saveState = true }
-              launchSingleTop = true
-              restoreState = true
-            }
-          },
-        )
-      }
-      composable(TopLevelDestination.Settings.route) {
-        SettingsScreen()
-      }
+        composable(Routes.HOME) {
+            HomeScreen(
+                onOpenSettings = {
+                    navController.navigate(Routes.SETTINGS) { launchSingleTop = true }
+                },
+            )
+        }
+        composable(Routes.SETTINGS) {
+            SettingsScreen(onBack = { navController.popBackStack() })
+        }
     }
-  }
 }

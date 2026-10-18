@@ -1,10 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status-bar silhouette of the launcher glyph (docs/brand/app-icon.svg), cropped to
+     the glyph's bounds. Strokes are thicker than the launcher's so they survive 24dp. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24"
-    android:tint="#FFFFFF">
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M12,2c-3.3,0 -6,2.7 -6,6v1c0,3.3 2.7,6 6,6s6,-2.7 6,-6V8c0,-3.3 -2.7,-6 -6,-6zM10,14c0,-1.1 0.9,-2 2,-2s2,0.9 2,2v1c0,1.1 -0.9,2 -2,2s-2,-0.9 -2,-2v-1z" />
+    android:viewportWidth="60"
+    android:viewportHeight="60">
+    <group
+        android:translateX="-24"
+        android:translateY="-23">
+        <path
+            android:pathData="M47,60 C47,53.5 42.5,49.4 39.5,46.4 A12,12 0 1,1 51.1,49.5"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="4.4"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M48,37.9 V31 M48,37.9 L53.2,43.1"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="4.4"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M65,68.5 A6,6 0 1,0 77,68.5 A6,6 0 1,0 65,68.5 Z"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="4.4" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M28.8,60 H67.2 C67.2,72.5 59,82.1 48,82.1 C37,82.1 28.8,72.5 28.8,60 Z" />
+    </group>
 </vector>

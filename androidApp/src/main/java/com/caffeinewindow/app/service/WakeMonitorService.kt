@@ -117,7 +117,8 @@ class WakeMonitorService : Service() {
   }
 
   private fun startForegroundWithType(notification: Notification) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+    // The specialUse type only exists from API 34; older releases take no type.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
       startForeground(
         MONITOR_NOTIFICATION_ID,
         notification,
@@ -131,12 +132,18 @@ class WakeMonitorService : Service() {
   companion object {
     private const val MONITOR_NOTIFICATION_ID = 1001
 
+    /**
+     * Safe to call from any process start. Android 12+ refuses foreground-service starts
+     * from the background unless an exemption applies (boot, exact alarm, battery
+     * exemption, visible activity); a refused start is logged instead of crashing the
+     * process, so e.g. an inexact alarm can still post its notification.
+     */
     fun start(context: Context) {
       val intent = Intent(context, WakeMonitorService::class.java)
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      try {
         context.startForegroundService(intent)
-      } else {
-        context.startService(intent)
+      } catch (e: IllegalStateException) {
+        Log.w(CaffeineLog.TAG, "WakeMonitorService start refused while in background", e)
       }
     }
   }

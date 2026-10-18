@@ -7,6 +7,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
 
@@ -45,6 +46,13 @@ interface WakeEventDao {
 
   @Query("DELETE FROM wake_events")
   suspend fun deleteAll()
+
+  /** Atomically swaps all rows, so a crash mid-rebuild cannot wipe history. */
+  @Transaction
+  suspend fun replaceAll(events: List<WakeEventEntity>) {
+    deleteAll()
+    events.forEach { insert(it) }
+  }
 
   @Query("SELECT * FROM wake_events ORDER BY timestampEpochMillis DESC")
   fun observeAll(): Flow<List<WakeEventEntity>>

@@ -30,7 +30,10 @@ expect object CaffeineDatabaseConstructor : RoomDatabaseConstructor<CaffeineData
 
 fun getRoomDatabase(builder: RoomDatabase.Builder<CaffeineDatabase>): CaffeineDatabase {
   return builder
-    .fallbackToDestructiveMigration(dropAllTables = true)
+    .addMigrations(*ALL_MIGRATIONS)
+    // Play never installs a lower versionCode over a higher one; this only covers
+    // sideloaded dev builds, where wiping is acceptable.
+    .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
     .setDriver(BundledSQLiteDriver())
     .setQueryCoroutineContext(Dispatchers.IO)
     .build()

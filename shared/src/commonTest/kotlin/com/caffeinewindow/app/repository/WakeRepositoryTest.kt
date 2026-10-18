@@ -13,7 +13,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -29,10 +31,14 @@ class WakeRepositoryTest {
     val dao = FakeWakeEventDao()
     val settingsRepository = SettingsRepository(FakeSettingsDao())
     val scheduler = RecordingNotificationScheduler()
-    val repository = WakeRepository(dao, settingsRepository, scheduler)
-
     val first = WakeEvent(Instant.parse("2025-06-25T06:00:00Z"), "screen_unlock")
-    val second = WakeEvent(Instant.parse("2025-06-25T08:00:00Z"), "screen_unlock")
+    val second = WakeEvent(Instant.parse("2025-06-25T06:10:00Z"), "screen_unlock")
+    val repository = WakeRepository(
+      dao,
+      settingsRepository,
+      scheduler,
+      FixedClock(first.timestamp + 15.minutes),
+    )
 
     val recordedFirst = repository.recordWakeEvent(first)
     val recordedSecond = repository.recordWakeEvent(second)
@@ -41,6 +47,70 @@ class WakeRepositoryTest {
     assertNull(recordedSecond)
     assertEquals(1, dao.insertedCount)
     assertEquals(1, scheduler.scheduleCount)
+    assertEquals(first.timestamp + 90.minutes, scheduler.lastTriggerAt)
+  }
+
+  @Test
+  fun pastDayWakeIsStoredButNotScheduled() = runTest {
+    val dao = FakeWakeEventDao()
+    val scheduler = RecordingNotificationScheduler()
+    val stale = WakeEvent(Instant.parse("2025-06-24T06:00:00Z"), "screen_unlock")
+    val repository = WakeRepository(
+      dao,
+      SettingsRepository(FakeSettingsDao()),
+      scheduler,
+      FixedClock(stale.timestamp + 2.days),
+    )
+
+    assertNotNull(repository.recordWakeEvent(stale))
+
+    assertEquals(0, scheduler.scheduleCount)
+    assertEquals(0, scheduler.showCount)
+  }
+
+  @Test
+  fun rescheduleAfterWindowOpenShowsOnlyOncePerDay() = runTest {
+    val dao = FakeWakeEventDao()
+    val settingsRepository = SettingsRepository(FakeSettingsDao())
+    val scheduler = RecordingNotificationScheduler()
+    val wake = morningWake()
+    val repository = WakeRepository(
+      dao,
+      settingsRepository,
+      scheduler,
+      FixedClock(wake + 2.hours),
+    )
+    seedTodayWake(dao, wake)
+
+    // e.g. the alarm was lost to a reboot that spanned the window opening
+    repository.rescheduleFromLatestWake()
+    // e.g. a settings change or service restart later the same day
+    repository.rescheduleFromLatestWake()
+
+    assertEquals(1, scheduler.showCount)
+    assertEquals(0, scheduler.scheduleCount)
+  }
+
+  @Test
+  fun rescheduleSkipsDayAlreadyNotifiedByAlarm() = runTest {
+    val dao = FakeWakeEventDao()
+    val settingsRepository = SettingsRepository(FakeSettingsDao())
+    val scheduler = RecordingNotificationScheduler()
+    val wake = morningWake()
+    val repository = WakeRepository(
+      dao,
+      settingsRepository,
+      scheduler,
+      FixedClock(wake + 30.minutes),
+    )
+    val dayStart = seedTodayWake(dao, wake)
+    repository.markCaffeineWindowNotified(dayStart)
+
+    repository.rescheduleFromLatestWake()
+
+    assertEquals(0, scheduler.showCount)
+    assertEquals(0, scheduler.scheduleCount)
+    assertEquals(1, scheduler.cancelCount)
   }
 
   @Test
@@ -111,8 +181,8 @@ class WakeRepositoryTest {
 
     assertEquals(1, scheduler.scheduleCount)
     assertEquals(
-      Instant.fromEpochMilliseconds(now.toEpochMilliseconds()),
-      scheduler.lastWakeTimestamp,
+      Instant.fromEpochMilliseconds(now.toEpochMilliseconds()) + 90.minutes,
+      scheduler.lastTriggerAt,
     )
   }
 
@@ -227,19 +297,49 @@ private class FakeSettingsDao(
   }
 }
 
+/** 08:00 local on a fixed date, so wake + a few hours stays inside one logical day. */
+private fun morningWake(): Instant {
+  return DayBoundary.logicalDayStart(Instant.parse("2025-06-25T12:00:00Z"), resetHour = 3) + 5.hours
+}
+
+private fun seedTodayWake(dao: FakeWakeEventDao, wake: Instant): Instant {
+  val dayStart = DayBoundary.logicalDayStart(wake, resetHour = 3)
+  dao.seed(
+    WakeEventEntity(
+      id = 1,
+      timestampEpochMillis = wake.toEpochMilliseconds(),
+      source = "screen_unlock",
+      logicalDayStartEpochMillis = dayStart.toEpochMilliseconds(),
+    ),
+  )
+  return dayStart
+}
+
+private class FixedClock(private val instant: Instant) : Clock {
+  override fun now(): Instant = instant
+}
+
 private class RecordingNotificationScheduler : NotificationScheduler {
   var scheduleCount = 0
+  var showCount = 0
   var cancelCount = 0
-  var lastWakeTimestamp: Instant? = null
+  var lastTriggerAt: Instant? = null
 
   override suspend fun scheduleCaffeineWindowNotification(
-    wakeTimestamp: Instant,
-    delayMinutes: Int,
+    triggerAt: Instant,
+    logicalDayStart: Instant,
     notificationTitle: String,
     notificationBody: String,
   ) {
     scheduleCount++
-    lastWakeTimestamp = wakeTimestamp
+    lastTriggerAt = triggerAt
+  }
+
+  override suspend fun showCaffeineWindowNotification(
+    notificationTitle: String,
+    notificationBody: String,
+  ) {
+    showCount++
   }
 
   override suspend fun cancelScheduledNotification() {

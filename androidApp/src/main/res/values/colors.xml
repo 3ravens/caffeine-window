@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#6F4E37</color>
+    <!-- Brand icon colors (docs/brand/app-icon.svg). Deliberately lighter than the UI
+         accent `primary` #9A5B34; used only by the launcher icon and splash. -->
+    <color name="ic_launcher_background">#BE7A3D</color>
+    <color name="ic_launcher_glyph">#EDE2C4</color>
+    <color name="window_background">#F7F5F2</color>
 </resources>

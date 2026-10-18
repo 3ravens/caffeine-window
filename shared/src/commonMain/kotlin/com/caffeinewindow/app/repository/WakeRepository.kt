@@ -6,6 +6,8 @@ import com.caffeinewindow.app.db.toDomain
 import com.caffeinewindow.app.db.toEntity
 import com.caffeinewindow.app.scheduler.DayBoundary
 import com.caffeinewindow.app.scheduler.NotificationScheduler
+import com.caffeinewindow.app.scheduler.SchedulingMath
+import com.caffeinewindow.app.settings.AppSettings
 import com.caffeinewindow.app.wake.WakeEvent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -19,6 +21,7 @@ class WakeRepository(
   private val wakeEventDao: WakeEventDao,
   private val settingsRepository: SettingsRepository,
   private val notificationScheduler: NotificationScheduler,
+  private val clock: Clock = Clock.System,
 ) {
   fun observeLatestWakeEvent(): Flow<WakeEvent?> {
     return wakeEventDao.observeLatest().map { entity -> entity?.toDomain() }
@@ -31,7 +34,7 @@ class WakeRepository(
     ) { events, settings ->
       val timeZone = TimeZone.currentSystemDefault()
       val logicalDayStart = DayBoundary.logicalDayStart(
-        instant = Clock.System.now(),
+        instant = clock.now(),
         resetHour = settings.resetHour,
         timeZone = timeZone,
       )
@@ -70,12 +73,12 @@ class WakeRepository(
       logicalDayStartEpochMillis = logicalDayStart.toEpochMilliseconds(),
     )
 
-    notificationScheduler.scheduleCaffeineWindowNotification(
-      wakeTimestamp = event.timestamp,
-      delayMinutes = settings.delayMinutes,
-      notificationTitle = settings.notificationTitle,
-      notificationBody = settings.notificationBody,
-    )
+    // A late or replayed event can belong to a past logical day. Keep it as history,
+    // but only today's wake drives the notification.
+    val todayStart = DayBoundary.logicalDayStart(clock.now(), settings.resetHour, timeZone)
+    if (logicalDayStart == todayStart) {
+      scheduleOrNotify(event, logicalDayStart, settings)
+    }
 
     return recorded.toDomain()
   }
@@ -86,16 +89,18 @@ class WakeRepository(
    */
   suspend fun rescheduleFromLatestWake() {
     val settings = settingsRepository.getSettings()
-    val todayWake = getTodayWakeEvent(settings.resetHour) ?: run {
+    val timeZone = TimeZone.currentSystemDefault()
+    val logicalDayStart = DayBoundary.logicalDayStart(clock.now(), settings.resetHour, timeZone)
+    val todayWake = getTodayWakeEvent(logicalDayStart, settings.resetHour, timeZone) ?: run {
       notificationScheduler.cancelScheduledNotification()
       return
     }
-    notificationScheduler.scheduleCaffeineWindowNotification(
-      wakeTimestamp = todayWake.timestamp,
-      delayMinutes = settings.delayMinutes,
-      notificationTitle = settings.notificationTitle,
-      notificationBody = settings.notificationBody,
-    )
+    scheduleOrNotify(todayWake, logicalDayStart, settings)
+  }
+
+  /** Called once the caffeine-window notification for [logicalDayStart] has been shown. */
+  suspend fun markCaffeineWindowNotified(logicalDayStart: Instant) {
+    settingsRepository.setLastNotifiedLogicalDay(logicalDayStart.toEpochMilliseconds())
   }
 
   /**
@@ -121,23 +126,51 @@ class WakeRepository(
           logicalDayStartEpochMillis = dayStart,
         )
       }
+      .sortedBy { it.timestampEpochMillis }
 
     // Rebuild rows so unique-index updates cannot collide mid-migration.
-    wakeEventDao.deleteAll()
-    for (keeper in keepers.sortedBy { it.timestampEpochMillis }) {
-      wakeEventDao.insert(keeper)
-    }
+    wakeEventDao.replaceAll(keepers)
 
     rescheduleFromLatestWake()
   }
 
-  private suspend fun getTodayWakeEvent(resetHour: Int): WakeEvent? {
-    val timeZone = TimeZone.currentSystemDefault()
-    val logicalDayStart = DayBoundary.logicalDayStart(
-      instant = Clock.System.now(),
-      resetHour = resetHour,
-      timeZone = timeZone,
-    )
+  /**
+   * Schedules the alarm for a future window, or shows the notification now if the
+   * window already opened and today's notification has not been shown yet. At most
+   * one caffeine-window notification is shown per logical day.
+   */
+  private suspend fun scheduleOrNotify(
+    wake: WakeEvent,
+    logicalDayStart: Instant,
+    settings: AppSettings,
+  ) {
+    if (settingsRepository.getLastNotifiedLogicalDay() == logicalDayStart.toEpochMilliseconds()) {
+      notificationScheduler.cancelScheduledNotification()
+      return
+    }
+    val target = SchedulingMath.targetNotificationTime(wake.timestamp, settings.delayMinutes)
+    if (target > clock.now()) {
+      notificationScheduler.scheduleCaffeineWindowNotification(
+        triggerAt = target,
+        logicalDayStart = logicalDayStart,
+        notificationTitle = settings.notificationTitle,
+        notificationBody = settings.notificationBody,
+      )
+    } else {
+      notificationScheduler.cancelScheduledNotification()
+      notificationScheduler.showCaffeineWindowNotification(
+        notificationTitle = settings.notificationTitle,
+        notificationBody = settings.notificationBody,
+      )
+      markCaffeineWindowNotified(logicalDayStart)
+    }
+  }
+
+  private suspend fun getTodayWakeEvent(
+    logicalDayStart: Instant,
+    resetHour: Int,
+    timeZone: TimeZone,
+  ): WakeEvent? {
     return wakeEventDao.getAll()
       .filter { entity ->
         matchesLogicalDay(entity, logicalDayStart, resetHour, timeZone)

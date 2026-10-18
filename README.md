@@ -20,6 +20,8 @@ androidApp/      Jetpack Compose UI, Hilt DI, Android signal source, notificatio
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the public/private open-core split (Pro wearable tier lives in a separate private repo).
 
+UI work follows [DESIGN.md](DESIGN.md) — the default design system for every screen: color roles, type scale, spacing, component recipes, copy rules, and motion.
+
 ## Build
 
 Requirements: Android Studio Ladybug or newer, JDK 17.

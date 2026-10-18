@@ -1,20 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Caffeine Window</string>
+
+    <!-- Shared chrome -->
+    <string name="action_settings">Settings</string>
+    <string name="action_back">Back</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_allow">Allow</string>
+    <string name="action_done">Done</string>
+
+    <!-- Home: countdown / window states -->
+    <string name="home_countdown_caption">until your window opens</string>
+    <string name="home_countdown_minutes">%1$d min</string>
+    <string name="home_countdown_hours_minutes">%1$d h %2$d min</string>
+    <string name="home_countdown_hours">%1$d h</string>
+    <plurals name="home_countdown_minutes_a11y">
+        <item quantity="one">%1$d minute until your caffeine window opens, at %2$s</item>
+        <item quantity="other">%1$d minutes until your caffeine window opens, at %2$s</item>
+    </plurals>
+    <string name="home_times">Woke %1$s · Opens %2$s</string>
+    <string name="home_delay_chip">%1$d min delay</string>
+    <string name="home_idle_title">No wake-up yet today</string>
+    <string name="home_idle_body">Unlock your phone after waking. Your caffeine window starts then.</string>
+    <string name="home_last_wake_today">Last wake-up: today %1$s</string>
+    <string name="home_last_wake_yesterday">Last wake-up: yesterday %1$s</string>
+    <string name="home_last_wake_older">Last wake-up: %1$s, %2$s</string>
+    <string name="home_window_open_title">Window open</string>
+    <string name="home_window_opened_at">Opened at %1$s</string>
+    <string name="home_window_open_body">Your %1$d-minute delay has passed. Try caffeine now if you want.</string>
+
+    <!-- Home: setup row + sheet -->
+    <string name="home_setup_title">Finish setup</string>
+    <plurals name="home_setup_missing_count">
+        <item quantity="one">%1$d permission missing</item>
+        <item quantity="other">%1$d permissions missing</item>
+    </plurals>
+    <string name="home_setup_sheet_title">Finish setup</string>
+    <string name="home_setup_sheet_body">These keep your morning reminder on time. Nothing leaves your phone.</string>
+    <string name="home_setup_notifications_title">Notifications</string>
+    <string name="home_setup_notifications_body">So the window-open alert can reach you.</string>
+    <string name="home_setup_exact_alarms_title">Exact alarms</string>
+    <string name="home_setup_exact_alarms_body">Without this, the alert can arrive a few minutes late.</string>
+    <string name="home_setup_battery_title">Battery optimization</string>
+    <string name="home_setup_battery_body">Some phones stop background wake detection to save power. Open Battery and allow unrestricted use.</string>
+
+    <!-- Settings: sections and rows -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_timing">Timing</string>
+    <string name="settings_section_message">Notification</string>
+    <string name="settings_section_reliability">Reliability</string>
+    <string name="settings_delay_label">Delay after waking</string>
+    <string name="settings_delay_support">Minutes after waking</string>
+    <string name="settings_delay_option">%1$d</string>
+    <string name="settings_day_start_label">New day starts at</string>
+    <string name="settings_day_start_support">Unlocks before %1$s count toward the previous day.</string>
+    <string name="settings_day_start_dialog_title">New day starts at</string>
+    <string name="settings_message_label">Message</string>
+    <string name="settings_message_sheet_title">Notification message</string>
+    <string name="settings_message_title_field">Title</string>
+    <string name="settings_message_body_field">Body</string>
+    <string name="settings_message_reset">Reset to default</string>
+    <string name="settings_message_value">“%1$s”</string>
+
+    <!-- Settings: reliability -->
+    <string name="settings_reliability_notifications">Notifications</string>
+    <string name="settings_reliability_exact_alarms">Exact alarms</string>
+    <string name="settings_reliability_battery">Battery optimization</string>
+    <string name="settings_reliability_on">On</string>
+    <string name="settings_reliability_off_alert">Off · the alert may be late</string>
+    <string name="settings_reliability_off_none">Off · no alert will arrive</string>
+    <string name="settings_monitor_label">Monitoring notification</string>
+    <string name="settings_monitor_support">Android shows it while the app watches for unlocks. Hiding it keeps wake detection running.</string>
+    <string name="settings_monitor_notification_hidden">Hidden (wake detection still active)</string>
+    <string name="settings_monitor_notification_visible">Visible</string>
+
+    <!-- Settings: confirmations -->
+    <string name="settings_delay_saved">Delay set to %1$d min</string>
+    <string name="settings_delay_saved_opens_at">Delay set to %1$d min · opens at %2$s</string>
+    <string name="settings_delay_saved_already_open">Delay set to %1$d min · your window is already open</string>
+    <string name="settings_message_saved">Message saved</string>
+    <string name="settings_day_start_saved">Day starts at %1$d:00</string>
+
+    <!-- Channels -->
     <string name="monitor_channel_name">Wake monitoring</string>
     <string name="monitor_channel_description">Keeps wake detection active while the phone is locked.</string>
     <string name="monitor_notification_title">Caffeine Window is monitoring unlocks</string>
-    <string name="monitor_notification_body">Local wake detection for your caffeine delay timer.</string>
+    <string name="monitor_notification_body">Local wake detection, on this device only.</string>
     <string name="caffeine_channel_name">Caffeine window alerts</string>
     <string name="caffeine_channel_description">Notifies you when your caffeine delay window opens.</string>
-    <string name="settings_monitor_notification_title">Wake monitoring notification</string>
-    <string name="settings_monitor_notification_body">Android requires a small ongoing notification while the app watches for your wake-up. You can hide it without turning off caffeine alerts — open Wake monitoring below and turn off that channel or set it to Silent.</string>
-    <string name="settings_monitor_notification_hidden">Hidden (wake detection still active)</string>
-    <string name="settings_monitor_notification_visible">Visible</string>
-    <string name="settings_monitor_notification_manage">Manage channel</string>
-    <string name="home_reliability_title">Setup needed for reliable wake detection</string>
-    <string name="home_reliability_body">Without notifications, exact alarms, and a battery-optimization exemption, overnight unlock detection can miss your wake-up.</string>
-    <string name="home_reliability_grant_notifications">Grant notifications</string>
-    <string name="home_reliability_open_exact_alarms">Allow exact alarms</string>
-    <string name="home_reliability_open_battery">Disable battery optimization</string>
-    <string name="home_reliability_open_settings">Open Settings</string>
 </resources>

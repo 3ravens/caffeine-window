@@ -6,11 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.caffeinewindow.app.scheduler.NotificationScheduler
-import com.caffeinewindow.app.scheduler.SchedulingMath
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
 @Singleton
@@ -19,59 +17,52 @@ class AndroidNotificationScheduler @Inject constructor(
   private val alarmManager: AlarmManager,
 ) : NotificationScheduler {
   override suspend fun scheduleCaffeineWindowNotification(
-    wakeTimestamp: Instant,
-    delayMinutes: Int,
+    triggerAt: Instant,
+    logicalDayStart: Instant,
     notificationTitle: String,
     notificationBody: String,
   ) {
-    val now = Clock.System.now()
-    val target = SchedulingMath.targetNotificationTime(wakeTimestamp, delayMinutes)
-
-    if (SchedulingMath.isWindowOpen(wakeTimestamp, delayMinutes, now)) {
-      cancelScheduledNotification()
-      NotificationFactory(context).showCaffeineWindowNotification(notificationTitle, notificationBody)
-      return
-    }
-
     // Cancel any existing alarm first. Building the real PendingIntent must come
     // last, because FLAG_UPDATE_CURRENT mutates the shared PendingIntent's extras
     // (Android matches PendingIntents ignoring extras), so a later empty build
-    // would otherwise clobber the title/body the AlarmReceiver needs.
+    // would otherwise clobber the extras the AlarmReceiver needs.
     cancelScheduledNotification()
 
-    val triggerAtMillis = target.toEpochMilliseconds()
-    val pendingIntent = buildAlarmPendingIntent(notificationTitle, notificationBody)
+    val triggerAtMillis = triggerAt.toEpochMilliseconds()
+    val pendingIntent = buildAlarmPendingIntent(
+      title = notificationTitle,
+      body = notificationBody,
+      logicalDayStartMillis = logicalDayStart.toEpochMilliseconds(),
+    )
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
-      alarmManager.setAndAllowWhileIdle(
-        AlarmManager.RTC_WAKEUP,
-        triggerAtMillis,
-        pendingIntent,
-      )
-    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      alarmManager.setExactAndAllowWhileIdle(
-        AlarmManager.RTC_WAKEUP,
-        triggerAtMillis,
-        pendingIntent,
-      )
+      alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
     } else {
-      alarmManager.setExact(
-        AlarmManager.RTC_WAKEUP,
-        triggerAtMillis,
-        pendingIntent,
-      )
+      alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
     }
   }
 
-  override suspend fun cancelScheduledNotification() {
-    alarmManager.cancel(buildAlarmPendingIntent("", ""))
+  override suspend fun showCaffeineWindowNotification(
+    notificationTitle: String,
+    notificationBody: String,
+  ) {
+    NotificationFactory(context).showCaffeineWindowNotification(notificationTitle, notificationBody)
   }
 
-  private fun buildAlarmPendingIntent(title: String, body: String): PendingIntent {
+  override suspend fun cancelScheduledNotification() {
+    alarmManager.cancel(buildAlarmPendingIntent(title = "", body = "", logicalDayStartMillis = 0L))
+  }
+
+  private fun buildAlarmPendingIntent(
+    title: String,
+    body: String,
+    logicalDayStartMillis: Long,
+  ): PendingIntent {
     val intent = Intent(context, AlarmReceiver::class.java).apply {
       action = AlarmReceiver.ACTION_SHOW_CAFFEINE_NOTIFICATION
       putExtra(AlarmReceiver.EXTRA_TITLE, title)
       putExtra(AlarmReceiver.EXTRA_BODY, body)
+      putExtra(AlarmReceiver.EXTRA_LOGICAL_DAY_START, logicalDayStartMillis)
     }
     return PendingIntent.getBroadcast(
       context,

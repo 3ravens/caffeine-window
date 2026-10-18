@@ -1,9 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher glyph: cup with steam curling into a clock face. Source of truth is
+     docs/brand/app-icon.svg; keep the geometry in sync. Also used as the monochrome
+     (themed icon) layer, where Android ignores the colors and uses alpha only. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- steam rising out of the cup and curling into the clock face -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,24c-11,0 -20,9 -20,20v8c0,11 9,20 20,20s20,-9 20,-20v-8c0,-11 -9,-20 -20,-20zM44,52c0,-5.5 4.5,-10 10,-10s10,4.5 10,10v4c0,5.5 -4.5,10 -10,10s-10,-4.5 -10,-10v-4z" />
+        android:pathData="M47,60 C47,53.5 42.5,49.4 39.5,46.4 A12,12 0 1,1 51.1,49.5"
+        android:strokeColor="@color/ic_launcher_glyph"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <!-- clock hands -->
+    <path
+        android:pathData="M48,37.9 V30.2 M48,37.9 L53.8,43.7"
+        android:strokeColor="@color/ic_launcher_glyph"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <!-- handle -->
+    <path
+        android:pathData="M65,68.5 A6,6 0 1,0 77,68.5 A6,6 0 1,0 65,68.5 Z"
+        android:strokeColor="@color/ic_launcher_glyph"
+        android:strokeWidth="3.2" />
+    <!-- cup -->
+    <path
+        android:fillColor="@color/ic_launcher_glyph"
+        android:pathData="M28.8,60 H67.2 C67.2,72.5 59,82.1 48,82.1 C37,82.1 28.8,72.5 28.8,60 Z" />
 </vector>
