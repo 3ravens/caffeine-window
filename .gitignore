@@ -21,3 +21,7 @@ google-services.json
 *.keystore
 *.jks
 !debug.keystore
+
+# Local planning, design and agent docs (not published)
+*.md
+!README.md

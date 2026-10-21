@@ -18,9 +18,7 @@ shared/          Kotlin Multiplatform — wake interface, repository, Room DB, s
 androidApp/      Jetpack Compose UI, Hilt DI, Android signal source, notifications
 ```
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the public/private open-core split (Pro wearable tier lives in a separate private repo).
-
-UI work follows [DESIGN.md](DESIGN.md) — the default design system for every screen: color roles, type scale, spacing, component recipes, copy rules, and motion.
+This repo is the free tier. A future Pro tier (wearable sleep data as the wake signal) will live in a separate private repo.
 
 ## Build
 
