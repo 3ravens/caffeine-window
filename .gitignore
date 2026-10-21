@@ -19,4 +19,5 @@ out/
 release/
 google-services.json
 *.keystore
+*.jks
 !debug.keystore
