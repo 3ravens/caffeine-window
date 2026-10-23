@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy Policy · Caffeine Window</title>
+  <meta name="description" content="Privacy policy for the Caffeine Window Android app. The app collects no data and has no internet access.">
+  <style>
+    :root {
+      --bg: #F7F5F2;
+      --text: #1F1B17;
+      --muted: #6B635B;
+      --accent: #9A5B34;
+      --card: #FFFFFF;
+      --line: #E2DDD6;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #151311;
+        --text: #EDE8E2;
+        --muted: #A9A096;
+        --accent: #E0A57E;
+        --card: #1E1B18;
+        --line: #3A352F;
+      }
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    main { max-width: 680px; margin: 0 auto; padding: 32px 16px 64px; }
+    h1 { font-size: 28px; font-weight: 500; margin: 0 0 4px; }
+    h2 { font-size: 18px; font-weight: 500; margin: 32px 0 8px; color: var(--accent); }
+    p, li { margin: 0 0 12px; }
+    ul { padding-left: 20px; }
+    .meta { color: var(--muted); margin-bottom: 24px; }
+    .summary {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+    .summary p:last-child { margin-bottom: 0; }
+    code { font-size: 14px; }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Caffeine Window Privacy Policy</h1>
+  <p class="meta">Effective 23 October 2026</p>
+
+  <div class="summary">
+    <p><strong>In short:</strong> Caffeine Window collects no personal data and shares nothing with anyone. Everything it stores stays on your phone. The app does not request internet access, so Android does not let it send data anywhere.</p>
+  </div>
+
+  <h2>Who this covers</h2>
+  <p>This policy covers the Caffeine Window app for Android, published on Google Play by the developer of the open-source <a href="https://github.com/3ravens/caffeine-window">caffeine-window</a> project. The full source code is public, so you can check every statement here yourself.</p>
+
+  <h2>What the app stores on your phone</h2>
+  <p>To work, the app keeps a small database in its private storage on your device:</p>
+  <ul>
+    <li><strong>Wake times:</strong> the time of your first phone unlock after your chosen day start, one per day. The app keeps this history so it can show your last wake-up and, in a future version, simple statistics.</li>
+    <li><strong>Settings:</strong> your delay (60, 90 or 120 minutes), the hour your day starts, and the text of the notification.</li>
+    <li><strong>Notification state:</strong> which day the "window open" notification was last shown, so you never get it twice in one day.</li>
+  </ul>
+  <p>Other apps cannot read this storage. The app does not record anything else about how you use your phone: it only notes that an unlock happened and when.</p>
+
+  <h2>What the app does not do</h2>
+  <ul>
+    <li>No account or sign-in.</li>
+    <li>No internet access. The app does not hold Android's internet permission.</li>
+    <li>No analytics, advertising, tracking or crash-reporting services.</li>
+    <li>No location, contacts, photos, microphone, camera or health data.</li>
+    <li>No selling or sharing of data with anyone, because no data leaves your device.</li>
+  </ul>
+
+  <h2>Permissions and why they are needed</h2>
+  <ul>
+    <li><strong>Notifications</strong> (<code>POST_NOTIFICATIONS</code>): to tell you when your caffeine window opens.</li>
+    <li><strong>Foreground service</strong> (<code>FOREGROUND_SERVICE</code>, <code>FOREGROUND_SERVICE_SPECIAL_USE</code>): Android only tells apps about screen unlocks while they are running, so the app keeps a small service running with a silent, persistent notification.</li>
+    <li><strong>Start at boot</strong> (<code>RECEIVE_BOOT_COMPLETED</code>): to restart that service and restore today's reminder after your phone restarts.</li>
+    <li><strong>Exact alarms</strong> (<code>SCHEDULE_EXACT_ALARM</code>): so the reminder arrives on time instead of minutes late. You can turn this off; the reminder then may arrive a little later.</li>
+  </ul>
+  <p>The app may also ask you to exclude it from battery optimization in Android's settings. Some phones otherwise stop the service overnight. This only changes how Android manages the app's power use; it gives the app no access to any data.</p>
+
+  <h2>Backups</h2>
+  <p>Android's cloud backup is turned off for this app, so its data is not copied to your Google account. If you move to a new phone with a direct device-to-device transfer, Android may copy the app's data across as part of that transfer. The data stays between your own devices.</p>
+
+  <h2>Google Play</h2>
+  <p>When you install the app from Google Play, Google processes information such as your account and device details under its own <a href="https://policies.google.com/privacy">privacy policy</a>. The developer only receives the anonymous, aggregated statistics and crash reports that Google Play provides to all developers. The developer cannot identify individual users from these.</p>
+
+  <h2>Deleting your data</h2>
+  <p>Uninstall the app, or go to Android Settings &rarr; Apps &rarr; Caffeine Window &rarr; Storage &rarr; Clear storage. Either removes everything the app stored. Because nothing is kept anywhere else, there is nothing more to request.</p>
+
+  <h2>Children</h2>
+  <p>The app is not directed at children under 13.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If a future version changes what the app stores or adds optional features that need other data, this policy will be updated before that version is released, and the effective date above will change. The history of this page is public in the project's repository.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about this policy or the app: open an issue at <a href="https://github.com/3ravens/caffeine-window/issues">github.com/3ravens/caffeine-window/issues</a>.</p>
+</main>
+</body>
+</html>
