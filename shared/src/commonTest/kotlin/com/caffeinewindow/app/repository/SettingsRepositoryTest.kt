@@ -82,4 +82,8 @@ private class InMemorySettingsDao : SettingsDao {
     val without = values.value.filterNot { it.key == setting.key }
     values.value = without + setting
   }
+
+  override suspend fun delete(key: String) {
+    values.value = values.value.filterNot { it.key == key }
+  }
 }

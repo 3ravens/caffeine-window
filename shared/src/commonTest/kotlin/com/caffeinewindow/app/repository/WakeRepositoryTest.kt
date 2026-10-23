@@ -114,6 +114,47 @@ class WakeRepositoryTest {
   }
 
   @Test
+  fun delayChangeMovingWindowLaterReArmsNotification() = runTest {
+    // Woke 08:00, 60-min window opened and notified at 09:00; at 09:15 the user picks 90 min.
+    val dao = FakeWakeEventDao()
+    val settingsRepository = SettingsRepository(
+      FakeSettingsDao(initial = mapOf(SettingsKeys.DELAY_MINUTES to "60")),
+    )
+    val scheduler = RecordingNotificationScheduler()
+    val wake = morningWake()
+    val repository = WakeRepository(dao, settingsRepository, scheduler, FixedClock(wake + 75.minutes))
+    val dayStart = seedTodayWake(dao, wake)
+    repository.markCaffeineWindowNotified(dayStart)
+
+    settingsRepository.updateDelayMinutes(90)
+    repository.onDelayChanged()
+
+    assertEquals(1, scheduler.scheduleCount)
+    assertEquals(wake + 90.minutes, scheduler.lastTriggerAt)
+    assertEquals(0, scheduler.showCount)
+  }
+
+  @Test
+  fun delayChangeKeepingWindowOpenDoesNotNotifyAgain() = runTest {
+    // Window already notified; the new delay still puts the opening in the past.
+    val dao = FakeWakeEventDao()
+    val settingsRepository = SettingsRepository(
+      FakeSettingsDao(initial = mapOf(SettingsKeys.DELAY_MINUTES to "60")),
+    )
+    val scheduler = RecordingNotificationScheduler()
+    val wake = morningWake()
+    val repository = WakeRepository(dao, settingsRepository, scheduler, FixedClock(wake + 3.hours))
+    val dayStart = seedTodayWake(dao, wake)
+    repository.markCaffeineWindowNotified(dayStart)
+
+    settingsRepository.updateDelayMinutes(120)
+    repository.onDelayChanged()
+
+    assertEquals(0, scheduler.scheduleCount)
+    assertEquals(0, scheduler.showCount)
+  }
+
+  @Test
   fun concurrentDuplicateInsertReturnsNull() = runTest {
     val settingsRepository = SettingsRepository(FakeSettingsDao())
     val scheduler = RecordingNotificationScheduler()
@@ -294,6 +335,10 @@ private class FakeSettingsDao(
   override suspend fun upsert(setting: SettingsEntity) {
     val without = values.value.filterNot { it.key == setting.key }
     values.value = without + setting
+  }
+
+  override suspend fun delete(key: String) {
+    values.value = values.value.filterNot { it.key == key }
   }
 }
 

@@ -43,7 +43,15 @@
     <string name="home_setup_exact_alarms_title">Exact alarms</string>
     <string name="home_setup_exact_alarms_body">Without this, the alert can arrive a few minutes late.</string>
     <string name="home_setup_battery_title">Battery optimization</string>
-    <string name="home_setup_battery_body">Some phones stop background wake detection to save power. Open Battery and allow unrestricted use.</string>
+    <string name="home_setup_battery_body">Some phones stop wake detection overnight to save power.</string>
+
+    <!-- Battery guide dialog (Home and Settings) -->
+    <string name="battery_guide_title">Let the app run in the background</string>
+    <string name="battery_guide_intro">Android will open this app\'s info page. There:</string>
+    <string name="battery_guide_step_1">1. Tap \"App battery usage\" or \"Battery\".</string>
+    <string name="battery_guide_step_2">2. Choose \"Unrestricted\". On some phones, first turn on \"Allow background usage\". On Xiaomi, choose \"No restrictions\".</string>
+    <string name="battery_guide_step_3">3. Come back here. The item disappears once it\'s set.</string>
+    <string name="battery_guide_open">Open settings</string>
 
     <!-- Settings: sections and rows -->
     <string name="settings_title">Settings</string>

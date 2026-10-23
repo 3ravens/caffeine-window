@@ -24,6 +24,9 @@ interface SettingsDao {
 
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun upsert(setting: SettingsEntity)
+
+  @Query("DELETE FROM settings WHERE key = :key")
+  suspend fun delete(key: String)
 }
 
 object SettingsKeys {

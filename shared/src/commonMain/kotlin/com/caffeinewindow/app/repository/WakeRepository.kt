@@ -98,6 +98,24 @@ class WakeRepository(
     scheduleOrNotify(todayWake, logicalDayStart, settings)
   }
 
+  /**
+   * The user changed the delay. If that moves today's window into the future, it is a
+   * new window and gets its own notification, even if the old one was already shown.
+   * Every other reschedule keeps the one-notification-per-day guard.
+   */
+  suspend fun onDelayChanged() {
+    val settings = settingsRepository.getSettings()
+    val timeZone = TimeZone.currentSystemDefault()
+    val logicalDayStart = DayBoundary.logicalDayStart(clock.now(), settings.resetHour, timeZone)
+    val todayWake = getTodayWakeEvent(logicalDayStart, settings.resetHour, timeZone)
+    if (todayWake != null &&
+      SchedulingMath.targetNotificationTime(todayWake.timestamp, settings.delayMinutes) > clock.now()
+    ) {
+      settingsRepository.clearLastNotifiedLogicalDay()
+    }
+    rescheduleFromLatestWake()
+  }
+
   /** Called once the caffeine-window notification for [logicalDayStart] has been shown. */
   suspend fun markCaffeineWindowNotified(logicalDayStart: Instant) {
     settingsRepository.setLastNotifiedLogicalDay(logicalDayStart.toEpochMilliseconds())

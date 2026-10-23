@@ -63,6 +63,10 @@ class SettingsRepository(
     )
   }
 
+  suspend fun clearLastNotifiedLogicalDay() {
+    settingsDao.delete(SettingsKeys.LAST_NOTIFIED_LOGICAL_DAY)
+  }
+
   suspend fun ensureDefaults() {
     val current = getSettings()
     if (settingsDao.getValue(SettingsKeys.DELAY_MINUTES) == null) {

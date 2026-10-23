@@ -9,6 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -17,6 +18,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.caffeinewindow.app.permission.PermissionHelper
+import com.caffeinewindow.app.ui.components.BatteryGuideDialog
 
 @Composable
 fun SettingsScreen(
@@ -28,6 +30,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val activity = context as? android.app.Activity
     var hasRequestedNotifications by remember { mutableStateOf(false) }
+    var showBatteryGuide by rememberSaveable { mutableStateOf(false) }
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -73,7 +76,7 @@ fun SettingsScreen(
             onOpenExactAlarms = {
                 context.startActivity(PermissionHelper.createExactAlarmSettingsIntent(context))
             },
-            onOpenBattery = { PermissionHelper.openBatteryOptimizationSettings(context) },
+            onOpenBattery = { showBatteryGuide = true },
             onOpenMonitorChannel = {
                 context.startActivity(PermissionHelper.createMonitorChannelSettingsIntent(context))
             },
@@ -81,4 +84,11 @@ fun SettingsScreen(
         ),
         modifier = modifier,
     )
+
+    if (showBatteryGuide) {
+        BatteryGuideDialog(
+            onOpenSettings = { PermissionHelper.openBatteryOptimizationSettings(context) },
+            onDismiss = { showBatteryGuide = false },
+        )
+    }
 }

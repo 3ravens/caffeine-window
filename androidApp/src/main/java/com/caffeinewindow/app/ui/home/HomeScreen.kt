@@ -9,6 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -18,6 +19,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.caffeinewindow.app.MainActivity
 import com.caffeinewindow.app.permission.PermissionHelper
+import com.caffeinewindow.app.ui.components.BatteryGuideDialog
 
 @Composable
 fun HomeScreen(
@@ -29,6 +31,7 @@ fun HomeScreen(
     val context = LocalContext.current
     val activity = context as? MainActivity
     var hasRequestedNotifications by remember { mutableStateOf(false) }
+    var showBatteryGuide by rememberSaveable { mutableStateOf(false) }
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -78,8 +81,15 @@ fun HomeScreen(
             onOpenExactAlarms = {
                 context.startActivity(PermissionHelper.createExactAlarmSettingsIntent(context))
             },
-            onOpenBattery = { PermissionHelper.openBatteryOptimizationSettings(context) },
+            onOpenBattery = { showBatteryGuide = true },
         ),
         modifier = modifier,
     )
+
+    if (showBatteryGuide) {
+        BatteryGuideDialog(
+            onOpenSettings = { PermissionHelper.openBatteryOptimizationSettings(context) },
+            onDismiss = { showBatteryGuide = false },
+        )
+    }
 }

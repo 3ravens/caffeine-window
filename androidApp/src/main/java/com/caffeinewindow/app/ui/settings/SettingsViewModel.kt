@@ -77,7 +77,7 @@ class SettingsViewModel @Inject constructor(
     fun setDelay(option: DelayOption) {
         viewModelScope.launch {
             settingsRepository.updateDelayMinutes(option.minutes)
-            wakeRepository.rescheduleFromLatestWake()
+            wakeRepository.onDelayChanged()
             // Reading back tells us whether today's window is already open, so the snackbar
             // does not promise an open time that has already passed.
             val wake = wakeRepository.observeTodayWakeEvent().first()
